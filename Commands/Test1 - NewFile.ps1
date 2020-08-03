@@ -1,0 +1,1 @@
+New-Item -Path "$env:TEMP\odmon\NewFile.txt" -ItemType File

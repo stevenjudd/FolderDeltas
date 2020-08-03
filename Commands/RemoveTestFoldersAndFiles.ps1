@@ -1,0 +1,1 @@
+Remove-Item -Path "$env:TEMP\odmon" -Force
