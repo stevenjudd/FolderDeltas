@@ -4,6 +4,7 @@ $FoldersToCreate = @(
     "$env:TEMP\odmon\toDelete"
 )
 $FilesToCreate = @(
+    "$env:TEMP\odmon\modifyMe.txt",
     "$env:TEMP\odmon\deleteMe.txt",
     "$env:TEMP\odmon\root.txt",
     "$env:TEMP\odmon\modify\ModFile1.txt",

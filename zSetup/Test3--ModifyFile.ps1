@@ -1,0 +1,1 @@
+"Adding text" | Add-Content -Path "$env:TEMP\odmon\modifyMe.txt"
