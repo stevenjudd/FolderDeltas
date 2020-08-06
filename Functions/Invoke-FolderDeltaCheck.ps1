@@ -1,65 +1,67 @@
-# get the changes to OneDrive files and log the results
-$LogPath = Join-Path -Path "$env:TEMP" -ChildPath "odlogs"
-if (-not(Test-Path $LogPath)) {
-    New-Item -Path $LogPath -ItemType Directory -Force
-}
-$LogFile = Join-Path -Path $LogPath -ChildPath "OneDriveModifyNewRemoveLog-$(Get-Date -Format 'yyyyMMdd-HHmmss').txt"
-$XmlFile = Join-Path -Path $LogPath -ChildPath "OneDriveModifyNewRemoveXml-$(Get-Date -Format 'yyyyMMdd-HHmmss').xml"
-try {
-    # run the script to generate the deltas
-    $OneDriveDeltas = & (Join-Path -Path $PSScriptRoot -ChildPath "OneDriveDeltasOutput.ps1")
-    if ($OneDriveDeltas) {
-        $OneDriveDeltas | Export-Clixml -Path $XmlFile -Force -ErrorAction Stop
-        $OneDriveDeltas | ConvertTo-Csv -NoTypeInformation -ErrorAction Stop | Out-File -FilePath $LogFile -Force -ErrorAction Stop
-    }
-}
-catch {
-    throw $_
-}
+function Invoke-FolderDeltaCheck {
+    [CmdletBinding()]
+    param(
+        [ValidateScript( {
+                if (Test-Path -Path $_ -PathType Container) {
+                    $true
+                }
+                else {
+                    Write-Error "Folder not found. Please enter a valid folder path to update the reference file."
+                }
+            })]
+        [string]$Path = ".",
+        [ValidateScript( {
+                if (Test-Path -Path $_ -PathType Leaf) {
+                    $true
+                }
+                else {
+                    Write-Error "Reference file not found. Please enter a valid path for the reference file to compare against the specified Path."
+                }
+            })]
+        [string]$ReferenceFilePath = ".\ReferenceList.csv",
+        [string]$LogFileBaseName = "FolderDeltaCheck-$(Get-Date -Format "yyyyMMdd-HHmmss")",
+        [ValidateSet("csv", "json", "txt")]
+        [string]$LogFileType = "csv"
+    )
 
-# email the results
-$To = 'to@email.com'
-$From = 'from@email.com'
-
-#putting the here string here so it doesn't "ugly up" the code below
-$Body = @"
-Report save location: $LogFile
-Object save location: $XmlFile
-
-$(Get-Content -Path $LogFile | Out-String)
-"@
-
-if (Test-Path -Path $env:TEMP\odlogs\emailCreds.xml) {
-    if ($OneDriveDeltas) {
-        $Credential = Import-Clixml -Path "$env:TEMP\odlogs\emailCreds.xml"
-        $Params = @{
-            Body        = $Body
-            To          = $To
-            From        = $From
-            Subject     = "OneDrive Automation Report on $(Get-Date -Format 'yyyyMMdd-HHmmss')"
-            SmtpServer  = 'smtp.live.com'
-            Port        = "587"
-            Credential  = $Credential
-            UseSsl      = $true
-            ErrorAction = "Stop"
-        }
-        try {
-            Send-MailMessage @Params
-        }
-        catch {
-            throw $_
-        }
-    } #end if ($OneDriveDeltas)
+    Write-Verbose "create the log file"
+    $LogPath = Join-Path -Path $Path -ChildPath "$LogFileBaseName.$LogFileType"
     
-}
-else {
-    Write-Warning "Unable to locate credential file for email account"
-}
+    try {
+        if (-not(Test-Path $LogPath)) {
+            $null = New-Item -Path $LogPath -ItemType "File" -Force -ErrorAction Stop
+        }
+    }
+    catch {
+        throw "Unable to create logfile: $LogPath"
+    }
 
-# update the deltas
-try {
-    Invoke-Expression -Command (Get-Content -Path (Join-Path -Path $PSScriptRoot -ChildPath "OneDriveDeltasUpdate.ps1") | Out-String)
-}
-catch {
-    throw $_
-}
+    Write-Verbose "get the changes to Path folder files and log the results"
+    try {
+        Write-Verbose "run the script to generate the deltas"
+        $FolderDeltas = Get-FolderDelta -Path $Path -ReferenceFilePath $ReferenceFilePath
+        if ($FolderDeltas) {
+            switch ($LogFileType) {
+                "csv" { $LogContent = $FolderDeltas | ConvertTo-Csv -NoTypeInformation -ErrorAction Stop }
+                "json" { $LogContent = $FolderDeltas | ConvertTo-Json -ErrorAction Stop }
+                "txt" { $LogContent = $FolderDeltas | Out-String -ErrorAction Stop }
+            } # end switch $LogFileType
+            $LogContent | Out-File -FilePath $LogFile -Force -ErrorAction Stop
+            $FolderDeltas
+        }
+        else {
+            Write-Warning "No deltas found for folder: $Path"
+        }
+    }
+    catch {
+        throw $_
+    }
+
+    Write-Verbose "update the deltas"
+    try {
+        Update-FolderReferenceFile -Path $Path -ReferenceFilePath $ReferenceFilePath
+    }
+    catch {
+        throw $_
+    }
+} # end function Invoke-FolderDeltaCheck
