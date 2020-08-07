@@ -1,5 +1,10 @@
 # this is a controller script to run the Folder Delta check on $env:TEMP\odmod
 # and output the results to a log file and the console
+
+# load the functions in the current directory
+Get-ChildItem -Path $PSScriptRoot -Filter *.ps1 | ForEach-Object { . $_.FullName }
+
+# run
 $Path = Join-Path -Path $env:TEMP -ChildPath "odmon"
 $ReferenceFilePath = Join-Path -Path $Path -ChildPath "FolderFileList.csv"
 $LogFileBaseName = "odlog"
