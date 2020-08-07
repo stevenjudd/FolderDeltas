@@ -1,4 +1,4 @@
-function Get-FolderDelta {
+function Get-FdFolderDelta {
     [CmdletBinding()]
     param(
         [ValidateScript( {
@@ -67,4 +67,4 @@ function Get-FolderDelta {
             }
         } # end foreach ($AddModifyRemove in $DeltaListGroup)
     }
-} # end function Get-FolderDelta
+} # end function Get-FdFolderDelta

@@ -1,5 +1,15 @@
 # this is a controller script to run the Folder Delta check on $env:TEMP\odmod
 # and output the results to a log file and the console
+
+# load the module
+try {
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath "FolderDeltas")
+}
+catch {
+    throw $_
+}
+
+# run
 $Path = Join-Path -Path $env:TEMP -ChildPath "odmon"
 $ReferenceFilePath = Join-Path -Path $Path -ChildPath "FolderFileList.csv"
 $LogFileBaseName = "odlog"
@@ -20,13 +30,6 @@ if (Test-Path -Path $ReferenceFilePath) {
         Invoke-FolderDeltaCheck @InvokeFolderDeltaCheckParams
     
         # email the results
-        # $SendFolderDeltaEmailParams = @{
-        #     "To"         = $To
-        #     "From"       = $From
-        #     "LogFile"    = $LogFile
-        #     "Credential" = (Get-Credential -Credential "from@email.com")
-        # }
-        # Send-FolderDeltaEmail @SendFolderDeltaEmailParams
         $SendFolderDeltaEmailParams = @{
             "To"         = $To
             "From"       = $From

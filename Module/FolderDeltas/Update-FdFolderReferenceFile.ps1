@@ -1,4 +1,4 @@
-function Update-FolderReferenceFile {
+function Update-FdFolderReferenceFile {
     [CmdletBinding()]
     param(
         [ValidateScript( {
@@ -23,4 +23,4 @@ function Update-FolderReferenceFile {
     catch {
         throw $_
     }
-}
+} #end function Update-FdFolderReferenceFile

@@ -1,4 +1,4 @@
-function Send-FolderDeltaEmail {
+function Send-FdFolderDeltaEmail {
     [CmdletBinding()]
     param(
         [string]$To = "to@email.com",
@@ -38,4 +38,4 @@ function Send-FolderDeltaEmail {
     catch {
         throw $_
     }
-} # end function Send-FolderDeltaEmail
+} # end function Send-FdFolderDeltaEmail

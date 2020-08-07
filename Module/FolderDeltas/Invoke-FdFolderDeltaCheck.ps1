@@ -1,4 +1,4 @@
-function Invoke-FolderDeltaCheck {
+function Invoke-FdFolderDeltaCheck {
     [CmdletBinding()]
     param(
         [ValidateScript( {
@@ -64,4 +64,4 @@ function Invoke-FolderDeltaCheck {
     catch {
         throw $_
     }
-} # end function Invoke-FolderDeltaCheck
+} # end function Invoke-FdFolderDeltaCheck
