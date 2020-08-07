@@ -38,5 +38,4 @@ function Send-FolderDeltaEmail {
     catch {
         throw $_
     }
-    
-}
+} # end function Send-FolderDeltaEmail

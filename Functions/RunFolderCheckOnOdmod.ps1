@@ -1,31 +1,45 @@
 # this is a controller script to run the Folder Delta check on $env:TEMP\odmod
 # and output the results to a log file and the console
-try {
-    $InvokeFolderDeltaCheckParams = @{
-        "Path"              = (Join-Path -Path $env:TEMP -ChildPath "odmon")
-        "ReferenceFilePath" = Join-Path (Join-Path -Path $env:TEMP -ChildPath "odmon") OneDriveFileList.csv
-        "LogFileBaseName"   = "odlog"
-        "LogFileType"       = "csv"
-        "Verbose"           = $true
-    }
-    Invoke-FolderDeltaCheck @InvokeFolderDeltaCheckParams
+$Path = Join-Path -Path $env:TEMP -ChildPath "odmon"
+$ReferenceFilePath = Join-Path -Path $Path -ChildPath "FolderFileList.csv"
+$LogFileBaseName = "odlog"
+$LogFileType = "csv"
+$To = "to@email.com"
+$From = "from@email.com"
+$LogFile = Join-Path -Path $Path -ChildPath "$LogFileBaseName.$LogFileType"
 
-    # email the results
-    # $SendFolderDeltaEmailParams = @{
-    #     "To"         = "to@email.com"
-    #     "From"       = "from@email.com"
-    #     "LogFile"    = "$env:TEMP\odlog.csv"
-    #     "Credential" = (Get-Credential -Credential "from@email.com")
-    # }
-    # Send-FolderDeltaEmail @SendFolderDeltaEmailParams
-    $SendFolderDeltaEmailParams = @{
-        "To"         = "stevenjudd@outlook.com"
-        "From"       = "stevenkjudd@hotmail.com"
-        "LogFile"    = Join-Path (Join-Path -Path $env:TEMP -ChildPath "odmon") "odlog.csv"
-        "Credential" = (Get-Credential -Credential "stevenkjudd@hotmail.com")
+if (Test-Path -Path $ReferenceFilePath) {
+    try {
+        $InvokeFolderDeltaCheckParams = @{
+            "Path"              = $Path
+            "ReferenceFilePath" = $ReferenceFilePath
+            "LogFileBaseName"   = $LogFileBaseName
+            "LogFileType"       = $LogFileType
+            "Verbose"           = $true
+        }
+        Invoke-FolderDeltaCheck @InvokeFolderDeltaCheckParams
+    
+        # email the results
+        # $SendFolderDeltaEmailParams = @{
+        #     "To"         = $To
+        #     "From"       = $From
+        #     "LogFile"    = $LogFile
+        #     "Credential" = (Get-Credential -Credential "from@email.com")
+        # }
+        # Send-FolderDeltaEmail @SendFolderDeltaEmailParams
+        $SendFolderDeltaEmailParams = @{
+            "To"         = $To
+            "From"       = $From
+            "LogFile"    = $LogFile
+            "Credential" = (Get-Credential -Credential "stevenkjudd@hotmail.com")
+        }
+        Send-FolderDeltaEmail @SendFolderDeltaEmailParams
+    } #end try
+    catch {
+        throw $_
     }
-    Send-FolderDeltaEmail @SendFolderDeltaEmailParams
 }
-catch {
-    throw $_
+else {
+    # create the reference file
+    Update-FolderReferenceFile -Path $Path -ReferenceFilePath $ReferenceFilePath
 }

@@ -46,7 +46,7 @@ function Invoke-FolderDeltaCheck {
                 "json" { $LogContent = $FolderDeltas | ConvertTo-Json -ErrorAction Stop }
                 "txt" { $LogContent = $FolderDeltas | Out-String -ErrorAction Stop }
             } # end switch $LogFileType
-            $LogContent | Out-File -FilePath $LogFile -Force -ErrorAction Stop
+            $LogContent | Out-File -FilePath $LogPath -Force -ErrorAction Stop
             $FolderDeltas
         }
         else {
