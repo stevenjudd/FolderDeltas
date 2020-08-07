@@ -1,4 +1,5 @@
-. .\Get-FolderDelta.ps1
-. .\Invoke-FolderDeltaCheck.ps1
-. .\Send-FolderDeltaEmail.ps1
-. .\Update-FolderReferenceFile.ps1
+# load each of the functions
+. .\Get-FdFolderDelta.ps1
+. .\Invoke-FdFolderDeltaCheck.ps1
+. .\Send-FdFolderDeltaEmail.ps1
+. .\Update-FdFolderReferenceFile.ps1
